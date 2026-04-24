@@ -1,4 +1,4 @@
-﻿package com.Esteban.cinema.DTO.Mapping;
+package com.Esteban.cinema.DTO.Mapping;
 
 public class ShowtimeMapping {
 }

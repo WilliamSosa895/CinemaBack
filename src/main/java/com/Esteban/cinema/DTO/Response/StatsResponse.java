@@ -1,4 +1,4 @@
-﻿package com.Esteban.cinema.DTO.Response;
+package com.Esteban.cinema.DTO.Response;
 
 public class StatsResponse {
 }

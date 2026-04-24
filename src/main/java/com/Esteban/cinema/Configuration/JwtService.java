@@ -1,4 +1,4 @@
-﻿package com.Esteban.cinema.Configuration;
+package com.Esteban.cinema.Configuration;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

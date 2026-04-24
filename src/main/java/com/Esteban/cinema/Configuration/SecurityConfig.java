@@ -1,4 +1,4 @@
-﻿package com.Esteban.cinema.Configuration;
+package com.Esteban.cinema.Configuration;
 
 import java.util.List;
 

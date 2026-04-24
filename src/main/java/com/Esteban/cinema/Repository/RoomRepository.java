@@ -1,4 +1,4 @@
-﻿package com.Esteban.cinema.Repository;
+package com.Esteban.cinema.Repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

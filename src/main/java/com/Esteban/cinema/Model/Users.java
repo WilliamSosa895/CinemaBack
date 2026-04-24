@@ -1,4 +1,4 @@
-﻿package com.Esteban.cinema.Model;
+package com.Esteban.cinema.Model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

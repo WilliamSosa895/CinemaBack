@@ -1,4 +1,4 @@
-﻿package com.Esteban.cinema.exceptions;
+package com.Esteban.cinema.exceptions;
 
 public class BusinessException {
 }

@@ -1,4 +1,4 @@
-﻿package com.Esteban.cinema.Model;
+package com.Esteban.cinema.Model;
 
 public class Purchases {
 }

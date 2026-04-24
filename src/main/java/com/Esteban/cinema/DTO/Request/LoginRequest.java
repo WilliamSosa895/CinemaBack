@@ -1,4 +1,4 @@
-﻿package com.Esteban.cinema.DTO.Request;
+package com.Esteban.cinema.DTO.Request;
 
 public class LoginRequest {
 }
