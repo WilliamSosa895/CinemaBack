@@ -3,11 +3,13 @@
 # ==========================================
 
 # ===================
-# Variables de Entorno (CRÍTICO)
+# Variables de Entorno y Propiedades Locales (CRÍTICO)
 # ===================
 .env
 .env.local
 .env.*.local
+application-dev.properties
+application-local.properties
 
 # ===================
 # Maven
