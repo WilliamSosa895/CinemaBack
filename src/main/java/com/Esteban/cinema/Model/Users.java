@@ -22,8 +22,7 @@ public class Users {
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
-    @JsonIgnore
-    @Column(name = "rol", nullable = false)
+    @Column(name = "role", nullable = false)
     private String role;
 
     @Column(name = "email", nullable = false, unique = true)

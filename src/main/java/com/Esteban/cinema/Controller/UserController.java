@@ -23,9 +23,14 @@ public class UserController {
     private JwtService jwtService;
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> register(@Valid @RequestBody Users request) {
-        userService.register(request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody Users request) {
+        Users createdUser = userService.register(request);
+        Map<String, Object> response = new HashMap<>();
+        response.put("idUser", createdUser.getIdUser());
+        response.put("email", createdUser.getEmail());
+        response.put("fullName", createdUser.getFullName());
+        response.put("role", createdUser.getRole());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/signin")
@@ -42,9 +47,14 @@ public class UserController {
     }
 
     @PutMapping()
-    public ResponseEntity<Void> update(@RequestAttribute("idUser") Long idUser, @Valid @RequestBody Users request) {
-        userService.updateUser(request, idUser);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Map<String, Object>> update(@RequestAttribute("idUser") Long idUser, @Valid @RequestBody Users request) {
+        Users updatedUser = userService.updateUser(request, idUser);
+        Map<String, Object> response = new HashMap<>();
+        response.put("idUser", updatedUser.getIdUser());
+        response.put("email", updatedUser.getEmail());
+        response.put("fullName", updatedUser.getFullName());
+        response.put("role", updatedUser.getRole());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping()
