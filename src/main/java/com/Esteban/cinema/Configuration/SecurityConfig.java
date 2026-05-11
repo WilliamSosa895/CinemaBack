@@ -61,7 +61,8 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/auth/**", "/error").permitAll()
+                    .requestMatchers("/error").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/auth/signup", "/auth/signin").permitAll()
                         .requestMatchers(HttpMethod.GET, "/movies/all").permitAll()
                         .requestMatchers(HttpMethod.GET, "/showtimes/movie/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/showtimes/*").permitAll()

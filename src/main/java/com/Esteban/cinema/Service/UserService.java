@@ -51,7 +51,7 @@ public class UserService {
         }
     }
 
-    public void updateUser(Users request, Long idUser) {
+    public Users updateUser(Users request, Long idUser) {
         Optional<Users> usr = userRepository.findById(idUser);
 
         if(usr.isPresent()){
@@ -61,7 +61,7 @@ public class UserService {
             if(request.getPassword() != null && !request.getPassword().isEmpty()){
                 users.setPassword(passwordEncoder.encode(request.getPassword()));
             }
-            userRepository.save(users);
+            return userRepository.save(users);
         }else{
             throw new RuntimeException("Users with id " + idUser + " not found.");
         }

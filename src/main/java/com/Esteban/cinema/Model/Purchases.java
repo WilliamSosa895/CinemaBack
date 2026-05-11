@@ -25,7 +25,7 @@ public class Purchases {
     @JoinColumn(name = "id_showtime", nullable = false)
     private Showtimes showtime;
 
-    @Column(name = "total_amount", nullable = false)
+    @Column(name = "totalamount", nullable = false)
     private Double totalAmount;
 
     @OneToMany(mappedBy = "purchase")
