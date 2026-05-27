@@ -64,17 +64,19 @@ public class PurchaseService {
                     purchases.setTotalAmount(totalAmount);
 
                     purchases = purchaseRepository.save(purchases);
+                    final Purchases savedPurchase = purchases;
 
-                    seatMapping.saveSeats(purchaseRequest.getSeats(), showtime.get(), purchases);
+                    seatMapping.saveSeats(purchaseRequest.getSeats(), showtime.get(), savedPurchase);
 
                     String movies = movie.get().getTitle();
                     String rooms = showtime.get().getRoom().getName();
-                    String seats = seatMapping.buildSeatsResponse(purchases.getSeats())
+                    String seats = seatMapping.buildSeatsResponse(savedPurchase.getSeats())
                             .stream()
                             .map(SeatsResponse::getSeatNumber)
                             .collect(Collectors.joining(", "));
-                    String folio = "CP-" + purchases.getIdPurchase();
-                    String total = String.format("$%.2f", purchases.getTotalAmount());
+                    String folio = "CP-" + savedPurchase.getIdPurchase();
+                    String total = String.format("$%.2f", savedPurchase.getTotalAmount());
+                    final String userEmail = user.get().getEmail();
 
                     CompletableFuture.runAsync(() -> {
                         try {
@@ -84,15 +86,15 @@ public class PurchaseService {
                                     seats,
                                     folio,
                                     total,
-                                    user.get().getEmail()
+                                    userEmail
                             );
-                            log.info("Purchase {} confirmation email sent to {}", purchases.getIdPurchase(), user.get().getEmail());
+                            log.info("Purchase {} confirmation email sent to {}", savedPurchase.getIdPurchase(), userEmail);
                         } catch (MessagingException | IOException | WriterException ex) {
-                            log.error("Purchase {} was saved but email sending failed for {}", purchases.getIdPurchase(), user.get().getEmail(), ex);
+                            log.error("Purchase {} was saved but email sending failed for {}", savedPurchase.getIdPurchase(), userEmail, ex);
                         }
                     });
 
-                    log.info("Purchase {} saved; email dispatch scheduled for {}", purchases.getIdPurchase(), user.get().getEmail());
+                    log.info("Purchase {} saved; email dispatch scheduled for {}", savedPurchase.getIdPurchase(), userEmail);
                 }
 
             }
