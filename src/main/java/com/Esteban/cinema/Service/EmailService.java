@@ -1,79 +1,62 @@
 package com.Esteban.cinema.Service;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.mail.MailException;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import com.google.zxing.WriterException;
-import com.sendgrid.Method;
-import com.sendgrid.Request;
-import com.sendgrid.Response;
-import com.sendgrid.SendGrid;
-import com.sendgrid.helpers.mail.Mail;
-import com.sendgrid.helpers.mail.objects.Attachments;
-import com.sendgrid.helpers.mail.objects.Content;
-import com.sendgrid.helpers.mail.objects.Email;
 
 import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
 @Service
 public class EmailService {
 
-    @Value("${sendgrid.api.key}")
-    private String sendgridApiKey;
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
     @Value("${mail.from}")
     private String fromEmail;
 
     private final QrCodeService qrCodeService;
+    private final JavaMailSender mailSender;
 
-    public EmailService(QrCodeService qrCodeService) {
+    public EmailService(QrCodeService qrCodeService, JavaMailSender mailSender) {
         this.qrCodeService = qrCodeService;
+        this.mailSender = mailSender;
     }
 
     private void sendEmail(String to, String subject, String htmlBody, byte[] qrBytes)
             throws MessagingException {
 
-        Email from = new Email(fromEmail);
-        Email toEmail = new Email(to);
-        Content content = new Content("text/html", htmlBody);
-        Mail mail = new Mail(from, subject, toEmail, content);
-
-        if (qrBytes != null && qrBytes.length > 0) {
-            Attachments attachment = new Attachments();
-            attachment.setContent(Base64.getEncoder().encodeToString(qrBytes));
-            attachment.setType("image/png");
-            attachment.setFilename("qr.png");
-            attachment.setDisposition("inline");
-            attachment.setContentId("qrImage");
-            mail.addAttachments(attachment);
-        }
-
-        SendGrid sg = new SendGrid(sendgridApiKey);
-        Request request = new Request();
-
+        log.info("Preparing SMTP email to {} with subject {}", to, subject);
+        MimeMessage mime = mailSender.createMimeMessage();
         try {
-            request.setMethod(Method.POST);
-            request.setEndpoint("mail/send");
-            request.setBody(mail.build());
+            MimeMessageHelper helper = new MimeMessageHelper(mime, true, "UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlBody, true);
 
-            Response response = sg.api(request);
-
-            int status = response.getStatusCode();
-            System.out.println("SendGrid status: " + status);
-            System.out.println("SendGrid body: " + response.getBody());
-
-            if (status >= 400) {
-                throw new MessagingException(
-                        "Error enviando correo via SendGrid. Status: "
-                                + status + " Body: " + response.getBody()
-                );
+            if (qrBytes != null && qrBytes.length > 0) {
+                ByteArrayResource bar = new ByteArrayResource(qrBytes);
+                helper.addInline("qrImage", bar, "image/png");
             }
-        } catch (IOException e) {
-            throw new MessagingException("Error de IO al enviar correo via SendGrid", e);
+
+            mailSender.send(mime);
+            log.info("SMTP email sent successfully to {}", to);
+        } catch (MailException | jakarta.mail.MessagingException e) {
+            log.error("SMTP email failed for {}", to, e);
+            throw new MessagingException("Error enviando correo via SMTP", e);
         }
     }
 

@@ -1,0 +1,409 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "CinemaBack API",
+    "version": "1.0.0",
+    "description": "Especificación usada para ejecutar pruebas de integración CRUD desde Swagger UI."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Autenticación JWT"
+    },
+    {
+      "name": "Movies",
+      "description": "CRUD de películas"
+    },
+    {
+      "name": "Showtimes",
+      "description": "CRUD de funciones"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "example": "admin.cineplus@example.com" },
+          "password": { "type": "string", "example": "Admin1234!" }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "token": { "type": "string", "example": "eyJhbGciOiJIUzI1NiJ9..." },
+          "role": { "type": "string", "example": "ADMIN" }
+        }
+      },
+      "MovieInput": {
+        "type": "object",
+        "required": ["title", "duration", "genre", "price", "active"],
+        "properties": {
+          "title": { "type": "string", "example": "Estreno de prueba" },
+          "duration": { "type": "string", "example": "01:45:00" },
+          "genre": { "type": "string", "example": "Accion" },
+          "price": { "type": "number", "format": "double", "example": 12.5 },
+          "active": { "type": "boolean", "example": true },
+          "posterPath": { "type": "string", "example": "https://example.com/poster.jpg" }
+        }
+      },
+      "MovieResponse": {
+        "type": "object",
+        "properties": {
+          "idMovie": { "type": "integer", "format": "int64", "example": 1 },
+          "title": { "type": "string", "example": "Pelicula de prueba" },
+          "duration": { "type": "string", "example": "01:40:00" },
+          "genre": { "type": "string", "example": "Accion" },
+          "price": { "type": "number", "format": "double", "example": 12.5 },
+          "active": { "type": "boolean", "example": true },
+          "posterPath": { "type": "string", "example": "https://res.cloudinary.com/..." }
+        }
+      },
+      "ShowtimeRequest": {
+        "type": "object",
+        "required": ["movie", "room", "showtime", "language"],
+        "properties": {
+          "movie": {
+            "type": "object",
+            "properties": {
+              "idMovie": { "type": "integer", "format": "int64", "example": 1 }
+            }
+          },
+          "room": {
+            "type": "object",
+            "properties": {
+              "idRoom": { "type": "integer", "format": "int64", "example": 1 }
+            }
+          },
+          "showtime": { "type": "string", "format": "date-time", "example": "2026-05-25T18:30:00" },
+          "language": { "type": "string", "example": "Español" },
+          "active": { "type": "boolean", "example": true }
+        }
+      },
+      "ShowtimesResponse": {
+        "type": "object",
+        "properties": {
+          "idShowtime": { "type": "integer", "format": "int64", "example": 1 },
+          "movieTitle": { "type": "string", "example": "Pelicula de prueba" },
+          "roomName": { "type": "string", "example": "Sala 1" },
+          "showtime": { "type": "string", "format": "date-time", "example": "2026-05-25T18:30:00" },
+          "language": { "type": "string", "example": "Español" },
+          "active": { "type": "boolean", "example": true }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/signin": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Iniciar sesión",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login correcto",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          },
+          "400": { "description": "Credenciales inválidas" }
+        }
+      }
+    },
+    "/movies/all": {
+      "get": {
+        "tags": ["Movies"],
+        "summary": "Listar películas activas",
+        "responses": {
+          "200": {
+            "description": "Listado de películas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/MovieResponse" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/movies/{searchTitle}": {
+      "get": {
+        "tags": ["Movies"],
+        "summary": "Buscar películas por título",
+        "parameters": [
+          {
+            "name": "searchTitle",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "prueba"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Películas encontradas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/MovieResponse" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/movies": {
+      "post": {
+        "tags": ["Movies"],
+        "summary": "Crear película",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["movie"],
+                "properties": {
+                  "movie": { "$ref": "#/components/schemas/MovieInput" },
+                  "file": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Película creada" },
+          "403": { "description": "Solo administrador" }
+        }
+      }
+    },
+    "/movies/{idMovie}": {
+      "put": {
+        "tags": ["Movies"],
+        "summary": "Actualizar película",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "idMovie",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MovieInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Película actualizada" },
+          "403": { "description": "Solo administrador" }
+        }
+      },
+      "delete": {
+        "tags": ["Movies"],
+        "summary": "Eliminar película",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "idMovie",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Película eliminada" },
+          "403": { "description": "Solo administrador" }
+        }
+      }
+    },
+    "/showtimes": {
+      "get": {
+        "tags": ["Showtimes"],
+        "summary": "Listar funciones",
+        "responses": {
+          "200": {
+            "description": "Listado de funciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/ShowtimesResponse" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Showtimes"],
+        "summary": "Crear función",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ShowtimeRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Función creada" },
+          "403": { "description": "Solo administrador" }
+        }
+      }
+    },
+    "/showtimes/{idShowtime}": {
+      "get": {
+        "tags": ["Showtimes"],
+        "summary": "Obtener detalle de función",
+        "parameters": [
+          {
+            "name": "idShowtime",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalle de función",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ShowtimesResponse" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Showtimes"],
+        "summary": "Actualizar función",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "idShowtime",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ShowtimeRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Función actualizada" },
+          "403": { "description": "Solo administrador" }
+        }
+      },
+      "delete": {
+        "tags": ["Showtimes"],
+        "summary": "Eliminar función",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "idShowtime",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Función eliminada" },
+          "403": { "description": "Solo administrador" }
+        }
+      }
+    },
+    "/showtimes/movie/{idMovie}": {
+      "get": {
+        "tags": ["Showtimes"],
+        "summary": "Listar funciones por película",
+        "parameters": [
+          {
+            "name": "idMovie",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Funciones de la película",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/ShowtimesResponse" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/showtimes/search/{titleSearch}": {
+      "get": {
+        "tags": ["Showtimes"],
+        "summary": "Buscar funciones por título de película",
+        "parameters": [
+          {
+            "name": "titleSearch",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Funciones encontradas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/ShowtimesResponse" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

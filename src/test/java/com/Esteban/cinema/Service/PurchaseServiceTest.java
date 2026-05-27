@@ -3,6 +3,7 @@ package com.Esteban.cinema.Service;
 import com.Esteban.cinema.DTO.Mapping.PurchaseMapping;
 import com.Esteban.cinema.DTO.Mapping.SeatMapping;
 import com.Esteban.cinema.DTO.Request.PurchaseRequest;
+import com.Esteban.cinema.DTO.Response.PurchaseResponse;
 import com.Esteban.cinema.DTO.Response.SeatsResponse;
 import com.Esteban.cinema.Model.Movies;
 import com.Esteban.cinema.Model.Purchases;
@@ -13,6 +14,7 @@ import com.Esteban.cinema.Repository.MovieRepository;
 import com.Esteban.cinema.Repository.PurchaseRepository;
 import com.Esteban.cinema.Repository.ShowtimeRepository;
 import com.Esteban.cinema.Repository.UserRepository;
+import com.Esteban.cinema.exceptions.BusinessException;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,8 +29,11 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class PurchaseServiceTest {
@@ -154,5 +159,92 @@ class PurchaseServiceTest {
                 eq("$120.00"),
                 eq("buyer@test.com")
         );
+    }
+
+    @Test
+    void savePurchase_whenUserNotFound_doesNotSaveOrSendEmail() throws Exception {
+        PurchaseRequest request = new PurchaseRequest();
+        request.setIdShowtime(10L);
+        request.setSeats(List.of(List.of(0, 0)));
+
+        when(userRepository.findById(5L)).thenReturn(Optional.empty());
+
+        purchaseService.savePurchase(request, 5L);
+
+        verify(showtimeRepository, never()).findById(any());
+        verify(purchaseRepository, never()).save(any());
+        verify(emailService, never()).loadHtmlTemplatePurchaseAndSend(any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void getPurchaseByIdForUser_whenOwnerMatches_returnsMappedPurchase() {
+        Users user = new Users();
+        user.setIdUser(5L);
+
+        Purchases purchase = new Purchases();
+        purchase.setIdPurchase(200L);
+        purchase.setUser(user);
+
+        PurchaseResponse response = new PurchaseResponse();
+
+        when(purchaseRepository.findById(200L)).thenReturn(Optional.of(purchase));
+        when(purchaseMapping.purchaseView(purchase)).thenReturn(response);
+
+        PurchaseResponse result = purchaseService.getPurchaseByIdForUser(200L, 5L);
+
+        assertEquals(response, result);
+        verify(purchaseMapping).purchaseView(purchase);
+    }
+
+    @Test
+    void getPurchaseByIdForUser_whenPurchaseNotFound_throwsBusinessException() {
+        when(purchaseRepository.findById(999L)).thenReturn(Optional.empty());
+
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> purchaseService.getPurchaseByIdForUser(999L, 5L)
+        );
+
+        assertEquals("Purchase not found", exception.getMessage());
+    }
+
+    @Test
+    void getPurchaseByIdForUser_whenUserDoesNotOwnPurchase_throwsBusinessException() {
+        Users owner = new Users();
+        owner.setIdUser(8L);
+
+        Purchases purchase = new Purchases();
+        purchase.setIdPurchase(201L);
+        purchase.setUser(owner);
+
+        when(purchaseRepository.findById(201L)).thenReturn(Optional.of(purchase));
+
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> purchaseService.getPurchaseByIdForUser(201L, 5L)
+        );
+
+        assertEquals("You cannot access this purchase", exception.getMessage());
+    }
+
+    @Test
+    void getAllPurchasesByUser_returnsMappedPurchases() {
+        Purchases purchaseA = new Purchases();
+        purchaseA.setIdPurchase(1L);
+        Purchases purchaseB = new Purchases();
+        purchaseB.setIdPurchase(2L);
+
+        PurchaseResponse responseA = new PurchaseResponse();
+        PurchaseResponse responseB = new PurchaseResponse();
+
+        when(purchaseRepository.getAllPurchasesByUser(5L)).thenReturn(List.of(purchaseA, purchaseB));
+        when(purchaseMapping.purchaseView(purchaseA)).thenReturn(responseA);
+        when(purchaseMapping.purchaseView(purchaseB)).thenReturn(responseB);
+
+        List<PurchaseResponse> result = purchaseService.getAllPurchasesByUser(5L);
+
+        assertEquals(2, result.size());
+        assertEquals(responseA, result.get(0));
+        assertEquals(responseB, result.get(1));
     }
 }

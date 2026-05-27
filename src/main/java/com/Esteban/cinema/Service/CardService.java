@@ -6,8 +6,10 @@ import com.Esteban.cinema.Model.Users;
 import com.Esteban.cinema.Repository.CardRepository;
 import com.Esteban.cinema.Repository.UserRepository;
 import com.Esteban.cinema.exceptions.BusinessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +28,10 @@ public class CardService {
             card.setUser(user.get());
             cardRepository.save(card);
         } else {
-            throw new BusinessException("User with ID " + userId + " not found.");
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User with ID " + userId + " not found."
+            );
         }
     }
 

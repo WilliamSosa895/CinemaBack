@@ -69,7 +69,7 @@ public class ShowtimeService {
     }
 
     public List<ShowtimesResponse> getShowtimesFromMovie(Long idMovie) {
-        return showtimeRepository.findByMovieIdMovie(idMovie).stream().map(showtimeMapping::toResponse).toList();
+        return showtimeRepository.findByMovieIdMovieAndActiveTrue(idMovie).stream().map(showtimeMapping::toResponse).toList();
     }
 
     public ShowtimeDetails getShowtimeDetails(Long idShowtime) {

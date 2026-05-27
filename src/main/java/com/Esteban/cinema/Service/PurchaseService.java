@@ -24,9 +24,15 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class PurchaseService {
+
+    private static final Logger log = LoggerFactory.getLogger(PurchaseService.class);
 
     @Autowired
     private MovieRepository movieRepository;
@@ -70,11 +76,23 @@ public class PurchaseService {
                     String folio = "CP-" + purchases.getIdPurchase();
                     String total = String.format("$%.2f", purchases.getTotalAmount());
 
-                    try{
-                        emailService.loadHtmlTemplatePurchaseAndSend(movies, rooms, seats, folio, total, user.get().getEmail());
-                    }catch(MessagingException | IOException | WriterException ex){
-                        ex.printStackTrace();
-                    }
+                    CompletableFuture.runAsync(() -> {
+                        try {
+                            emailService.loadHtmlTemplatePurchaseAndSend(
+                                    movies,
+                                    rooms,
+                                    seats,
+                                    folio,
+                                    total,
+                                    user.get().getEmail()
+                            );
+                            log.info("Purchase {} confirmation email sent to {}", purchases.getIdPurchase(), user.get().getEmail());
+                        } catch (MessagingException | IOException | WriterException ex) {
+                            log.error("Purchase {} was saved but email sending failed for {}", purchases.getIdPurchase(), user.get().getEmail(), ex);
+                        }
+                    });
+
+                    log.info("Purchase {} saved; email dispatch scheduled for {}", purchases.getIdPurchase(), user.get().getEmail());
                 }
 
             }

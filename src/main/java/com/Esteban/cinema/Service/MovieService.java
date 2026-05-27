@@ -66,6 +66,10 @@ public class MovieService {
         return movieRepository.findAllIfActivate().stream().map(movieMapping::movieView).toList();
     }
 
+    public List<MovieResponse> getAllMoviesForBillboard() {
+        return movieRepository.findAllWithActiveShowtimes().stream().map(movieMapping::movieView).toList();
+    }
+
     private String uploadPosterToCloudinary(Long movieId, MultipartFile file) {
         try {
             Map uploadResult = cloudinary.uploader().upload(

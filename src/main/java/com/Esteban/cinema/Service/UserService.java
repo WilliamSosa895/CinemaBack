@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.Esteban.cinema.DTO.Request.LoginRequest;
 import com.Esteban.cinema.Model.Users;
 import com.Esteban.cinema.Repository.UserRepository;
+import com.Esteban.cinema.exceptions.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
@@ -31,7 +32,7 @@ public class UserService {
 
             return newUsers;
         }else{
-            throw new RuntimeException("Users with email " + request.getEmail() + " already exists.");
+            throw new BusinessException("Users with email " + request.getEmail() + " already exists.");
         }
     }
 
@@ -44,10 +45,10 @@ public class UserService {
             if(passwordEncoder.matches(request.getPassword(), users.getPassword())){
                 return usr.get();
             }else{
-                throw new RuntimeException("Invalid password.");
+                throw new BusinessException("Invalid password.");
             }
         }else{
-            throw new RuntimeException("Users with email " + request.getEmail() + " not found.");
+            throw new BusinessException("Users with email " + request.getEmail() + " not found.");
         }
     }
 
@@ -63,7 +64,7 @@ public class UserService {
             }
             return userRepository.save(users);
         }else{
-            throw new RuntimeException("Users with id " + idUser + " not found.");
+            throw new BusinessException("Users with id " + idUser + " not found.");
         }
     }
 
@@ -73,7 +74,7 @@ public class UserService {
         if(usr.isPresent()){
             return usr.get();
         }else{
-            throw new RuntimeException("Users with id " + idUser + " not found.");
+            throw new BusinessException("Users with id " + idUser + " not found.");
         }
     }
 }

@@ -15,8 +15,7 @@ El proyecto necesita las siguientes variables de entorno para funcionar:
 | `DB_URL` | URL JDBC de PostgreSQL | `jdbc:postgresql://host:25339/db?sslmode=require` |
 | `DB_USER` | Usuario de base de datos | `avnadmin` |
 | `DB_PASS` | Contraseña de base de datos | `contraseña_aqui` |
-| `SENDGRID_API_KEY` | API Key de SendGrid | `SG.xxxx...` |
-| `MAIL_FROM` | Email remitente verificado | `tu@gmail.com` |
+| `MAIL_FROM` | Email remitente SMTP | `tu@gmail.com` |
 | `CLOUDINARY_CLOUD_NAME` | Nombre de nube Cloudinary | `dtipujfyp` |
 | `CLOUDINARY_API_KEY` | API Key de Cloudinary | `498979736334734` |
 | `CLOUDINARY_API_SECRET` | API Secret de Cloudinary | `mZ3rwANzer...` |
@@ -42,7 +41,6 @@ El proyecto necesita las siguientes variables de entorno para funcionar:
    $env:DB_URL = "jdbc:postgresql://..."
    $env:DB_USER = "avnadmin"
    $env:DB_PASS = "AVNS_..."
-   $env:SENDGRID_API_KEY = "SG.xxx"
    $env:MAIL_FROM = "tu@gmail.com"
    $env:CLOUDINARY_CLOUD_NAME = "dtipujfyp"
    $env:CLOUDINARY_API_KEY = "498979736334734"
@@ -132,6 +130,6 @@ Si no aparecen, vuelve a definirlas o abre una nueva terminal.
 Después de esto:
 1. Define todas las variables de entorno
 2. Verifica que la BD de Aiven está accesible
-3. Verifica que Cloudinary y SendGrid funcionan
+3. Verifica que Cloudinary y SMTP funcionan
 4. Compila el proyecto
 5. Ejecuta: `mvn spring-boot:run`

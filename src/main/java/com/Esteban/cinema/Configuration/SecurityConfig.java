@@ -41,12 +41,16 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(urlFront));
+        config.setAllowedOriginPatterns(List.of(
+            urlFront,
+            "http://localhost:5173",
+            "http://127.0.0.1:5173"
+        ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
         config.setExposedHeaders(List.of("Authorization"));
-        config.setAllowCredentials(true);
+        config.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
@@ -62,8 +66,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                     .requestMatchers("/error").permitAll()
+                    .requestMatchers("/swagger/**").permitAll()
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/auth/signup", "/auth/signin").permitAll()
                         .requestMatchers(HttpMethod.GET, "/movies/all").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/movies/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/rooms").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/showtimes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/showtimes/movie/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/showtimes/*").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
