@@ -122,4 +122,8 @@ public class CompraProductoService {
                 .codigoQr(compra.getCodigoQr())
                 .build();
     }
+
+    public CompraProductoDto toDtoPublic(CompraProducto compra) {
+        return toDto(compra);
+    }
 }

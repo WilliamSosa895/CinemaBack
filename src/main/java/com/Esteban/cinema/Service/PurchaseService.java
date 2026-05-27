@@ -117,4 +117,8 @@ public class PurchaseService {
                 .stream().map(purchaseMapping::purchaseView).toList();
     }
 
+    public PurchaseResponse getPurchaseByEntity(Purchases purchase) {
+        return purchaseMapping.purchaseView(purchase);
+    }
+
 }
