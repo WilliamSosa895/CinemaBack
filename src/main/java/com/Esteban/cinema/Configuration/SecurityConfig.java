@@ -69,7 +69,7 @@ public class SecurityConfig {
                     .requestMatchers("/swagger/**").permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/auth/signup", "/auth/signin").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/productos", "/api/productos/*", "/api/combos", "/api/combos/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/productos", "/api/productos/*", "/api/combos", "/api/combos/*", "/api/estrenos", "/api/estrenos/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/movies/all").permitAll()
                         .requestMatchers(HttpMethod.GET, "/movies/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/rooms").permitAll()
