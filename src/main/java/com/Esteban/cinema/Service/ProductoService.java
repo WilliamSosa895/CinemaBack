@@ -35,6 +35,13 @@ public class ProductoService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public ProductoDto buscarPorId(Long id) {
+        Producto producto = productoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado"));
+        return toDto(producto);
+    }
+
     @Transactional
     public ProductoDto crear(ProductoRequestDto dto, MultipartFile imagen) {
         Producto producto = new Producto();
@@ -98,6 +105,12 @@ public class ProductoService {
 
         producto.setCantidadDisponible(nuevoStock);
         productoRepository.save(producto);
+    }
+
+    @Transactional(readOnly = true)
+    public Producto getProductoEntidad(Long id) {
+        return productoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado"));
     }
 
     private ProductoDto toDto(Producto producto) {

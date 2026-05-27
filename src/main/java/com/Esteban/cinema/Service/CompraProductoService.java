@@ -81,6 +81,17 @@ public class CompraProductoService {
         return toDto(saved);
     }
 
+    @Transactional(readOnly = true)
+    public List<CompraProductoDto> listarPorUsuario(Long usuarioId) {
+        Users usuario = userRepository.findById(usuarioId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        return compraProductoRepository.findByUsuarioOrderByFechaDesc(usuario)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
     private BigDecimal calcularTotal(List<ItemCarritoDto> items) {
         BigDecimal total = BigDecimal.ZERO;
         for (ItemCarritoDto item : items) {
