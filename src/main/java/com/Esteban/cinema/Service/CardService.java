@@ -6,9 +6,12 @@ import com.Esteban.cinema.Model.Users;
 import com.Esteban.cinema.Repository.CardRepository;
 import com.Esteban.cinema.Repository.UserRepository;
 import com.Esteban.cinema.exceptions.BusinessException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -22,11 +25,32 @@ public class CardService {
     @Autowired
     private UserRepository userRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Transactional
     public void saveCard(Cards card, Long userId) {
+        if (userId == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Usuario no autenticado"
+            );
+        }
+
         Optional<Users> user = userRepository.findById(userId);
         if (user.isPresent()) {
-            card.setUser(user.get());
-            cardRepository.save(card);
+            entityManager.createNativeQuery(
+                    "INSERT INTO cards (cardnumber, cardowner, expirationdate, card_number, card_owner, expiration_date, id_user) " +
+                    "VALUES (:cardnumber, :cardowner, :expirationdate, :cardNumber, :cardOwner, :expirationDate, :idUser)"
+            )
+            .setParameter("cardnumber", card.getCardNumber())
+            .setParameter("cardowner", card.getCardOwner())
+            .setParameter("expirationdate", card.getExpirationDate())
+            .setParameter("cardNumber", card.getCardNumber())
+            .setParameter("cardOwner", card.getCardOwner())
+            .setParameter("expirationDate", card.getExpirationDate())
+            .setParameter("idUser", userId)
+            .executeUpdate();
         } else {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,

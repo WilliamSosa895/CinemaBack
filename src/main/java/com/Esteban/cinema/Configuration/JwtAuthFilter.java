@@ -11,6 +11,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.Esteban.cinema.Repository.UserRepository;
+import com.Esteban.cinema.Model.Users;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +27,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -55,7 +61,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (username != null) {
+
+            if (userId == null) {
+                userId = userRepository.findByEmail(username)
+                        .map(Users::getIdUser)
+                        .orElse(null);
+            }
 
             UserDetails userDetails;
             try {
@@ -73,10 +85,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                 userDetails.getAuthorities()
                         );
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-
                 if (userId != null) {
                     request.setAttribute("idUser", userId);
+                }
+
+                if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
         }

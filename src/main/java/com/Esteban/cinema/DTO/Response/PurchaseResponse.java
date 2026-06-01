@@ -6,6 +6,8 @@ public class PurchaseResponse {
     private String roomName;
     private String seats;
     private String folio;
+    private String fecha;
+    private String fechaFuncion;
     private String totalAmount;
     private String qrImageBase64;
 
@@ -47,6 +49,22 @@ public class PurchaseResponse {
 
     public void setFolio(String folio) {
         this.folio = folio;
+    }
+
+    public String getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(String fecha) {
+        this.fecha = fecha;
+    }
+
+    public String getFechaFuncion() {
+        return fechaFuncion;
+    }
+
+    public void setFechaFuncion(String fechaFuncion) {
+        this.fechaFuncion = fechaFuncion;
     }
 
     public String getTotalAmount() {

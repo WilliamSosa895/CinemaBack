@@ -22,4 +22,7 @@ public class ItemCarritoDto {
 
     @NotNull
     private BigDecimal precioUnitario;
+
+    // 'producto' or 'combo'
+    private String tipo;
 }

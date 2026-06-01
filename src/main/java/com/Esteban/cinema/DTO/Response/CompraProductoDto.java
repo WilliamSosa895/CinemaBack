@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -18,4 +19,5 @@ public class CompraProductoDto {
     private Timestamp fecha;
     private BigDecimal total;
     private String codigoQr;
+    private List<CompraProductoItemDto> items;
 }

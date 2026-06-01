@@ -41,6 +41,9 @@ public class UserController {
 
         Map<String, Object> body = new HashMap<>();
         body.put("token", token);
+        body.put("idUser", logined.getIdUser());
+        body.put("email", logined.getEmail());
+        body.put("fullName", logined.getFullName());
         body.put("role", logined.getRole());
 
         return ResponseEntity.ok(body);

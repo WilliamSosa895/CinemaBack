@@ -51,6 +51,20 @@ CREATE TABLE IF NOT EXISTS compras_productos (
 CREATE INDEX IF NOT EXISTS idx_compras_productos_usuario_id ON compras_productos(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_compras_productos_fecha ON compras_productos(fecha);
 
+CREATE TABLE IF NOT EXISTS compras_productos_items (
+    id BIGSERIAL PRIMARY KEY,
+    compra_producto_id BIGINT NOT NULL,
+    producto_id BIGINT NOT NULL,
+    cantidad INTEGER NOT NULL CHECK (cantidad > 0),
+    CONSTRAINT fk_compras_productos_items_compra
+        FOREIGN KEY (compra_producto_id) REFERENCES compras_productos(id) ON DELETE CASCADE,
+    CONSTRAINT fk_compras_productos_items_producto
+        FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE RESTRICT
+);
+
+CREATE INDEX IF NOT EXISTS idx_compras_productos_items_compra_id ON compras_productos_items(compra_producto_id);
+CREATE INDEX IF NOT EXISTS idx_compras_productos_items_producto_id ON compras_productos_items(producto_id);
+
 CREATE TABLE IF NOT EXISTS estrenos (
     id BIGSERIAL PRIMARY KEY,
     titulo VARCHAR(200) NOT NULL,
