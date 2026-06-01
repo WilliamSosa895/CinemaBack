@@ -1,10 +1,14 @@
 package com.Esteban.cinema.DTO.Request;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 public class PurchaseRequest {
 
+    @NotNull(message = "Showtime ID is required")
     public Long idShowtime;
+    
+    @NotNull(message = "Seats are required")
     private List<List<Integer>> seats;
 
 

@@ -19,10 +19,9 @@ public class Users {
     @Column(name = "id_user")
     private Long idUser;
 
-    @Column(name = "full_name", nullable = false)
+    @Column(name = "fullname", nullable = false)
     private String fullName;
 
-    @JsonIgnore
     @Column(name = "rol", nullable = false)
     private String role;
 

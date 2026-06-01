@@ -7,8 +7,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.Esteban.cinema.Repository.UserRepository;
+import com.Esteban.cinema.Model.Users;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -23,6 +27,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -54,10 +61,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (username != null) {
 
-            UserDetails userDetails =
-                    userDetailsService.loadUserByUsername(username);
+            if (userId == null) {
+                userId = userRepository.findByEmail(username)
+                        .map(Users::getIdUser)
+                        .orElse(null);
+            }
+
+            UserDetails userDetails;
+            try {
+                userDetails = userDetailsService.loadUserByUsername(username);
+            } catch (UsernameNotFoundException e) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token user");
+                return;
+            }
 
             if (jwtService.isTokenValid(token, userDetails.getUsername())) {
                 UsernamePasswordAuthenticationToken authToken =
@@ -67,10 +85,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                 userDetails.getAuthorities()
                         );
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-
                 if (userId != null) {
                     request.setAttribute("idUser", userId);
+                }
+
+                if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
         }

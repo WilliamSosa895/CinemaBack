@@ -11,10 +11,10 @@ public class Seats {
     @Column(name = "id_seat")
     private Long idSeat;
 
-    @Column(name = "row_number", nullable = false)
+    @Column(name = "rownumber", nullable = false)
     private int rowNumber;
 
-    @Column(name = "column_number", nullable = false)
+    @Column(name = "columnnumber", nullable = false)
     private int columnNumber;
 
     @Column(name = "status", nullable = false)

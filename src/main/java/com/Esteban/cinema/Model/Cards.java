@@ -12,6 +12,15 @@ public class Cards {
     @Column(name = "id_card")
     private Long idCard;
 
+    @Column(name = "cardnumber", nullable = false)
+    private String cardNumberLegacy;
+
+    @Column(name = "cardowner", nullable = false)
+    private String cardOwnerLegacy;
+
+    @Column(name = "expirationdate", nullable = false)
+    private String expirationDateLegacy;
+
     @Column(name = "card_number", nullable = false)
     private String cardNumber;
 
@@ -56,6 +65,14 @@ public class Cards {
 
     public void setExpirationDate(String expirationDate) {
         this.expirationDate = expirationDate;
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void syncLegacyColumns() {
+        this.cardNumberLegacy = this.cardNumber;
+        this.cardOwnerLegacy = this.cardOwner;
+        this.expirationDateLegacy = this.expirationDate;
     }
 
     public Users getUser() {

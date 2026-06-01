@@ -22,6 +22,10 @@ public class PurchaseMapping {
         response.setId(purchase.getIdPurchase());
         String folio = "CP-" + purchase.getIdPurchase();
         response.setFolio(folio);
+        response.setFecha(purchase.getDate() != null ? purchase.getDate().toString() : null);
+        response.setFechaFuncion(purchase.getShowtime() != null && purchase.getShowtime().getShowtime() != null
+            ? purchase.getShowtime().getShowtime().toString()
+            : null);
         response.setMovieTitle(purchase.getShowtime().getMovie().getTitle());
         response.setRoomName(purchase.getShowtime().getRoom().getName());
         response.setSeats(seatMapping.buildSeatsResponse(purchase.getSeats())
