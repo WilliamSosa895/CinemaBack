@@ -62,6 +62,13 @@ public class MoviesController {
         return ResponseEntity.ok(movies);
     }
 
+    @GetMapping("/admin/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<MovieResponse>> getAllMoviesForAdmin (){
+        List<MovieResponse> movies = movieService.getAllActiveMovies();
+        return ResponseEntity.ok(movies);
+    }
+
     @GetMapping("/{searchTitle}")
     public ResponseEntity<List<MovieResponse>> getMoviesByTitle(@PathVariable String searchTitle){
         return ResponseEntity.ok(movieService.findByMovieTitle(searchTitle));

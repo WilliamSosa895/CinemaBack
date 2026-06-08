@@ -41,12 +41,16 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(urlFront));
+        config.setAllowedOriginPatterns(List.of(
+            urlFront,
+            "http://localhost:5173",
+            "http://127.0.0.1:5173"
+        ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
         config.setExposedHeaders(List.of("Authorization"));
-        config.setAllowCredentials(true);
+        config.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
@@ -61,8 +65,15 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/auth/**", "/error").permitAll()
+                    .requestMatchers("/error").permitAll()
+                    .requestMatchers("/swagger/**").permitAll()
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "auth/signup", "/auth/signin").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/productos", "/api/productos/*", "/api/combos", "/api/combos/*", "/api/estrenos", "/api/estrenos/*", "/api/estrenos/destacados").permitAll()
                         .requestMatchers(HttpMethod.GET, "/movies/all").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/movies/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/rooms").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/showtimes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/showtimes/movie/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/showtimes/*").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -70,6 +81,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/movies/**", "/showtimes/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT,  "/movies/**", "/showtimes/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/movies/**", "/showtimes/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/productos", "/api/combos", "/api/estrenos").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/productos/*", "/api/combos/*", "/api/estrenos/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/productos/*", "/api/combos/*", "/api/estrenos/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/productos/*/inventario").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/compras-dulceria").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/compras-dulceria/usuario/*", "/api/historial/usuario/*").authenticated()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

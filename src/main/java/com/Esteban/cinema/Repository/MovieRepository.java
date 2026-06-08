@@ -1,5 +1,21 @@
 package com.Esteban.cinema.Repository;
 
-public class MovieRepository {
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.Esteban.cinema.Model.Movies;
+
+public interface MovieRepository extends JpaRepository<Movies, Long> {
+    @Query("SELECT m FROM Movies m WHERE m.active=true")
+    List<Movies> findAllIfActivate();
+
+    @Query("SELECT DISTINCT m FROM Movies m JOIN Showtimes s ON s.movie = m WHERE m.active = true AND s.active = true")
+    List<Movies> findAllWithActiveShowtimes();
+
+    @Query("SELECT m FROM Movies m WHERE LOWER(m.title) LIKE LOWER(CONCAT('%', :title, '%')) AND m.active = true")
+    List<Movies> findByTitle(@Param("title") String title);
 }
 

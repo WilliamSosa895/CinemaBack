@@ -80,7 +80,7 @@ public class JwtService {
 
         long now = System.currentTimeMillis();
         Date issuedAt = new Date(now);
-        Date expiration = new Date(now + 5000 * 60 * 60);
+        Date expiration = new Date(now + 24 * 60 * 60 * 1000); // 24 horas
 
         return Jwts.builder()
                 .setClaims(claims)
