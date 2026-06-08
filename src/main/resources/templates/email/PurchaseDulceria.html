@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Confirmación de compra</title>
+    <title>Confirmación de compra de dulcería</title>
     <style>
         :root{
             --bg: #f6f6f8;
@@ -32,7 +32,7 @@
 
         .modal {
             width:100%;
-            max-width:420px;
+            max-width:460px;
             background: var(--card-bg);
             border-radius: 14px;
             border:1px solid var(--border);
@@ -113,6 +113,23 @@
             font-size:18px;
         }
 
+        .section-title{
+            font-size:13px;
+            font-weight:700;
+            color:#111827;
+            margin:0 0 8px;
+        }
+
+        .products-box{
+            background:#fafafa;
+            border:1px solid var(--border);
+            border-radius:12px;
+            padding:14px;
+            color:#111827;
+            font-size:14px;
+            line-height:1.5;
+        }
+
         .qr-wrap{
             display:flex;
             flex-direction:column;
@@ -121,8 +138,8 @@
         }
 
         .qr-box{
-            width:120px;
-            height:120px;
+            width:150px;
+            height:150px;
             border:2px dashed #e6e6e9;
             border-radius:10px;
             display:flex;
@@ -165,47 +182,39 @@
         </div>
 
         <h1>¡Compra Exitosa!</h1>
-        <p class="sub">Tu compra ha sido confirmada correctamente.</p>
+        <p class="sub">Tu compra de dulcería ha sido confirmada correctamente.</p>
 
         <div class="divider"></div>
 
         <div class="info-grid">
-            <div class="label">Película:</div>
-            <div class="value">{{PELICULA}}</div>
+            <div class="label">Compra:</div>
+            <div class="value folio">{{COMPRA}}</div>
 
-            <div class="label">Sala:</div>
-            <div class="value">{{SALA}}</div>
-
-            <div class="label">Asientos:</div>
-            <div class="value">{{ASIENTOS}}</div>
-
-            <div class="label">Folio:</div>
-            <div class="value folio">{{FOLIO}}</div>
+            <div class="label">Total:</div>
+            <div class="value total-amount">{{TOTAL}}</div>
         </div>
 
         <div class="divider"></div>
 
-        <div class="total-row">
-            <div style="color:var(--muted);font-size:13px;">Total:</div>
-            <div class="total-amount">{{TOTAL}}</div>
+        <div>
+            <p class="section-title">Productos</p>
+            <div class="products-box">
+                {{PRODUCTOS}}
+            </div>
         </div>
 
         <div class="qr-wrap">
             <div class="qr-box">
-
-                 <img src="{{QR_IMAGE}}" alt="QR"
-                     width="120" height="120"
-                     style="display:block;" />
-
+                <img src="{{QR_IMAGE}}" alt="QR de compra" width="150" height="150" style="display:block;" />
             </div>
             <div class="qr-caption">
-                Muestra este código en la entrada para validar tu boleto.
+                Muestra este código si necesitas validar tu compra de dulcería.
             </div>
         </div>
 
         <div class="footer">
             Gracias por tu compra.<br />
-            Conserva este correo, funciona como comprobante de tu boleto.
+            Conserva este correo como comprobante.
         </div>
     </div>
 </div>

@@ -15,7 +15,6 @@ import com.Esteban.cinema.Repository.PurchaseRepository;
 import com.Esteban.cinema.Repository.ShowtimeRepository;
 import com.Esteban.cinema.Repository.UserRepository;
 import com.Esteban.cinema.exceptions.BusinessException;
-import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,7 +26,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -99,12 +97,12 @@ class PurchaseServiceTest {
         purchaseService.savePurchase(request, 5L);
 
         verify(emailService).loadHtmlTemplatePurchaseAndSend(
-                eq("Interstellar"),
-                eq("Sala 1"),
-                eq("A1, A2"),
-                eq("CP-99"),
-                eq("$240.00"),
-                eq("buyer@test.com")
+            "Interstellar",
+            "Sala 1",
+            "A1, A2",
+            "CP-99",
+            "$240.00",
+            "buyer@test.com"
         );
     }
 
@@ -146,18 +144,18 @@ class PurchaseServiceTest {
         when(purchaseRepository.save(any(Purchases.class))).thenReturn(persisted);
         when(seatMapping.buildSeatsResponse(any())).thenReturn(List.of(seatA1));
 
-        doThrow(new MessagingException("mail error")).when(emailService)
+        doThrow(new IOException("mail error")).when(emailService)
                 .loadHtmlTemplatePurchaseAndSend(any(), any(), any(), any(), any(), any());
 
         purchaseService.savePurchase(request, 5L);
 
         verify(emailService).loadHtmlTemplatePurchaseAndSend(
-                eq("Interstellar"),
-                eq("Sala 1"),
-                eq("A1"),
-                eq("CP-100"),
-                eq("$120.00"),
-                eq("buyer@test.com")
+            "Interstellar",
+            "Sala 1",
+            "A1",
+            "CP-100",
+            "$120.00",
+            "buyer@test.com"
         );
     }
 

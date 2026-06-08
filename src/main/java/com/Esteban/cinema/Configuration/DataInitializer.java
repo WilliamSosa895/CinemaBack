@@ -94,5 +94,14 @@ public class DataInitializer implements CommandLineRunner {
         if (admin.getIdUser() == null) {
             throw new IllegalStateException("Admin seed could not be created");
         }
+        // Promote a specific auto-created account to ADMIN if present (useful for test/admin insertion)
+        String autoAdminEmail = "adminbab7bf6e@example.com"; // generated during this session
+        userRepository.findByEmail(autoAdminEmail).ifPresent(u -> {
+            if (!"ADMIN".equals(u.getRole())) {
+                u.setRole("ADMIN");
+                userRepository.save(u);
+            }
+        });
     }
+
 }
