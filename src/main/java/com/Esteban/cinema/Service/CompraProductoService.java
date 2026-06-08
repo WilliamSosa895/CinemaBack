@@ -64,12 +64,10 @@ public class CompraProductoService {
 
     @Transactional
     public CompraProductoDto procesarCompra(Long usuarioId, List<ItemCarritoDto> items) {
-        // Build required product quantities by expanding combos
         Map<Long, Integer> requiredByProduct = new HashMap<>();
 
         for (ItemCarritoDto item : items) {
-            String tipo = item.getTipo();
-            if (tipo != null && tipo.equalsIgnoreCase("combo")) {
+            if (item.getTipo() != null && item.getTipo().equalsIgnoreCase("combo")) {
                 Combo combo = comboRepository.findById(item.getProductoId())
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Combo no encontrado"));
 
@@ -78,42 +76,38 @@ public class CompraProductoService {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Combo sin productos");
                 }
 
-                for (ComboProducto cp : componentes) {
-                    Long pid = cp.getProducto().getId();
-                    int need = cp.getCantidad() * item.getCantidad();
-                    requiredByProduct.merge(pid, need, Integer::sum);
+                for (ComboProducto componente : componentes) {
+                    Long productId = componente.getProducto().getId();
+                    int requiredQuantity = componente.getCantidad() * item.getCantidad();
+                    requiredByProduct.merge(productId, requiredQuantity, Integer::sum);
                 }
             } else {
-                // treat as producto
                 requiredByProduct.merge(item.getProductoId(), item.getCantidad(), Integer::sum);
             }
         }
 
-        // Load all involved products
         Set<Long> productIds = requiredByProduct.keySet();
         List<Producto> productos = productoRepository.findAllById(productIds);
 
         if (productos.size() != productIds.size()) {
             Set<Long> found = productos.stream().map(Producto::getId).collect(Collectors.toSet());
-            for (Long pid : productIds) {
-                if (!found.contains(pid)) {
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado: " + pid);
+            for (Long productId : productIds) {
+                if (!found.contains(productId)) {
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado: " + productId);
                 }
             }
         }
 
-        // Validate stock
-        for (Producto p : productos) {
-            int need = requiredByProduct.getOrDefault(p.getId(), 0);
-            if (p.getCantidadDisponible() < need) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Stock insuficiente para: " + p.getNombre());
+        for (Producto producto : productos) {
+            int requiredQuantity = requiredByProduct.getOrDefault(producto.getId(), 0);
+            if (producto.getCantidadDisponible() < requiredQuantity) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Stock insuficiente para: " + producto.getNombre());
             }
         }
 
-        // Decrement stock
-        for (Producto p : productos) {
-            int need = requiredByProduct.getOrDefault(p.getId(), 0);
-            p.setCantidadDisponible(p.getCantidadDisponible() - need);
+        for (Producto producto : productos) {
+            int requiredQuantity = requiredByProduct.getOrDefault(producto.getId(), 0);
+            producto.setCantidadDisponible(producto.getCantidadDisponible() - requiredQuantity);
         }
         productoRepository.saveAll(productos);
 
@@ -124,17 +118,24 @@ public class CompraProductoService {
         compra.setFecha(Timestamp.from(Instant.now()));
         compra.setTotal(calcularTotal(items));
         compra = compraProductoRepository.save(compra);
-        final CompraProducto compraGuardada = compra;
 
+        final CompraProducto compraGuardada = compra;
         List<CompraProductoItem> detalleItems = productos.stream()
-            .map(producto -> CompraProductoItem.builder()
-                .compraProducto(compraGuardada)
-                .producto(producto)
-                .cantidad(requiredByProduct.getOrDefault(producto.getId(), 0))
-                .build())
-            .toList();
+                .map(producto -> CompraProductoItem.builder()
+                        .compraProducto(compraGuardada)
+                        .producto(producto)
+                        .cantidad(requiredByProduct.getOrDefault(producto.getId(), 0))
+                        .build())
+                .toList();
 
         compraProductoItemRepository.saveAll(detalleItems);
+
+        String productosHtml = detalleItems.stream()
+                .map(item -> "<li style=\"margin:0 0 6px;\"><strong>"
+                        + item.getCantidad() + " x "
+                        + escapeHtml(item.getProducto() != null ? item.getProducto().getNombre() : "Producto")
+                        + "</strong></li>")
+                .collect(Collectors.joining("", "<ul style=\"margin:0;padding-left:18px;\">", "</ul>"));
 
         String contenido = "DULCERIA-COMPRA-" + compra.getId();
         byte[] qrBytes = generarQR(contenido, 250, 250);
@@ -143,7 +144,13 @@ public class CompraProductoService {
         CompraProducto saved = compraProductoRepository.save(compra);
 
         if (usuario.getEmail() != null && !usuario.getEmail().isBlank()) {
-            notificationService.enviarConfirmacionSimple(usuario.getEmail(), saved.getId(), saved.getTotal().toPlainString());
+            notificationService.enviarConfirmacionSimple(
+                    usuario.getEmail(),
+                    saved.getId(),
+                    saved.getTotal().toPlainString(),
+                    saved.getCodigoQr(),
+                    productosHtml
+            );
         }
 
         return toDto(saved);
@@ -200,6 +207,18 @@ public class CompraProductoService {
                 .codigoQr(compra.getCodigoQr())
             .items(items)
                 .build();
+    }
+
+    private String escapeHtml(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
 
     public CompraProductoDto toDtoPublic(CompraProducto compra) {

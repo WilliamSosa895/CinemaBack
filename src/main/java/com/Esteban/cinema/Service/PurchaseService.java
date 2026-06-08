@@ -15,7 +15,6 @@ import com.Esteban.cinema.Repository.PurchaseRepository;
 import com.Esteban.cinema.Repository.ShowtimeRepository;
 import com.Esteban.cinema.Repository.UserRepository;
 import com.Esteban.cinema.exceptions.BusinessException;
-import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -89,7 +88,7 @@ public class PurchaseService {
                                     userEmail
                             );
                             log.info("Purchase {} confirmation email sent to {}", savedPurchase.getIdPurchase(), userEmail);
-                        } catch (MessagingException | IOException | WriterException ex) {
+                        } catch (IOException | WriterException ex) {
                             log.error("Purchase {} was saved but email sending failed for {}", savedPurchase.getIdPurchase(), userEmail, ex);
                         }
                     });
